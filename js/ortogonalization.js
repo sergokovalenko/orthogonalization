@@ -129,3 +129,43 @@ function determinant(A) {
 
 	return B[N - 1][N - 1];
 }
+
+function adjugateMatrix(A) {
+	const N = A.length, adjA = [];
+
+	for (let i = 0; i < N; i++) {
+		adjA[i] = []
+
+		for (let j = 0; j < N; j++) {
+			const B = [];
+			const sign = ((i + j) % 2 == 0) ? 1 : -1;
+
+			for (let k = 0; k < j; k++) {
+				B[k] = [];
+
+				for (let m = 0; m < i; m++) {
+					B[k][m] = A[k][m];
+				}
+
+				for (let n = i + 1; n < N; n++) {
+					B[k][n - 1] = A[k][n];
+				}
+			}
+
+			for (let k = j + 1; k < N; k++) {
+				B[k - 1] = [];
+
+				for (let m = 0; m < i; m++) {
+					B[k - 1][m] = A[k][m];
+				}
+
+				for (let m = i + 1; m < N; m++) {
+					B[k - 1][m - 1] = A[k][m];
+				}
+			}
+			adjA[i][j] = sign * determinant(B);
+		}
+	}
+
+	return adjA;
+}
