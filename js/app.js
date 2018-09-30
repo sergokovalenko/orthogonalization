@@ -13,7 +13,5 @@ window.onload = () => {
     [0.6, -0.5, 0.3, 2.5],
     [0.3, 0.2, 0.5, 11],
   ];
-  const startValue = document.getElementById('matrix');
-  const resultBlock = document.getElementById('result');
-  calc.calc(example);
+  calc.calc(matrix);
 };

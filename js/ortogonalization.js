@@ -1,37 +1,38 @@
 export function calc(matrix) {
-	let r = [[], [], [], [], []];
-	let a = [[], [], [], [], []];
+	let r = [];
+	let a = [];
 	let b = [];
 
-	//считывание столбцов
 	for (let i = 0; i < matrix.length; i++) {
-		for (let j = 0; j < matrix[i].length - 1; j++) {
-			a[j].push(matrix[i][j]);
-		}
+		r.push([]);
+		a.push([]);
 	}
 
-	//создание первого вектора и вектора-результата
 	for (let i = 0; i < matrix.length; i++) {
 		r[0].push(matrix[i][0]);
 		b.push(matrix[i].pop());
 	}
 
-	let j12 = calculateLambda(a[1], r[0]);
-	r[1] = sumLotsVectors(a[1], multiplicateNumberAndVector(-1 * j12, r[0]));
+	console.log('Matrix:');
+	console.log(matrix);
+	a = transMatrix(matrix);
+	const T = getUnitMatrix(r.length);
 
-	let j13 = calculateLambda(a[2], r[0]);
-	let j23 = calculateLambda(a[2], r[1]);
+	for (let i = 1; i < r[0].length; i++) {
+		let tmpValues = [];
 
-	let tmp1 = multiplicateNumberAndVector(-1 * j13, r[0]);
-	let tmp2 = multiplicateNumberAndVector(-1 * j23, r[1]);
+		for (let j = i - 1; j >= 0; j--) {
+			T[j][i] = calculateLambda(a[i], r[j]);
+			tmpValues.push(multiplicateNumberAndVector(-1 * T[j][i], r[j]));
+		}
 
-	const T = [[1, j12, j13], [0, 1, j23], [0, 0, 1]];
+		r[i] = sumVectorWithVectorsArr(a[i], tmpValues);
+	}
+
 	const Tinvers = inverseMatrix(T);
-	r[2] = sumLotsVectors(a[2], tmp1, tmp2);
-
 	let Rtrans = [];
 	let R = [];
-	for (let i = 0; i < 3; i++) {
+	for (let i = 0; i < matrix.length; i++) {
 		Rtrans.push(r[i]);
 	}
 	R = transMatrix(Rtrans);
@@ -39,11 +40,27 @@ export function calc(matrix) {
 	const D = multiplyMatrix(Rtrans, R);
 	const DInvers = inverseMatrix(D);
 
-	//вычисление результата
 	const betta = multiplyMatrixAndVector(Rtrans, b);
 	const TD = multiplyMatrix(Tinvers, DInvers);
 	const otvet = multiplyMatrixAndVector(TD, betta);
+	console.log('Result:');
 	console.log(otvet);
+}
+
+function getUnitMatrix(n) {
+	const matrix = [];
+	for (let i = 0; i < n; i++) {
+		matrix.push([]);
+		for (let j = 0; j < n; j++) {
+			matrix[i][j] = 0;
+		}
+	}
+
+	for (let i = 0; i < n; i++) {
+		matrix[i][i] = 1;
+	}
+
+	return matrix;
 }
 
 function calculateLambda(a, r) {
@@ -67,7 +84,11 @@ function multiplicateNumberAndVector(num, vector) {
 }
 
 function sumVectorWithVectorsArr(vector, vectorsArr) {
-	let result = new Array(vectors.length + 1);
+	let result = [];
+
+	for (let i = 0; i < vector.length; i++) {
+		result.push(0);
+	}
 
 	for (let i = 0; i < vectorsArr.length; i++) {
 		for (let j = 0; j < vectorsArr[i].length; j++) {
@@ -87,7 +108,11 @@ function sumVectors(v1, v2) {
 }
 
 export function sumLotsVectors(...vectors) {
-	let result = new Array(vectors.length);
+	let result = [];
+
+	for (let i = 0; i < vectors[0].length; i++) {
+		result.push(0);
+	}
 
 	for (let i = 0; i < vectors.length; i++) {
 		for (let j = 0; j < vectors[i].length; j++) {
