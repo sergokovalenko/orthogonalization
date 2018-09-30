@@ -1,6 +1,7 @@
 export function calc(matrix) {
 	let r = [[], [], [], [], []];
 	let a = [[], [], [], [], []];
+	let b = [];
 
 	//считывание столбцов
 	for (let i = 0; i < matrix.length; i++) {
@@ -9,27 +10,40 @@ export function calc(matrix) {
 		}
 	}
 
-	//создание первого вектора
+	//создание первого вектора и вектора-результата
 	for (let i = 0; i < matrix.length; i++) {
 		r[0].push(matrix[i][0]);
+		b.push(matrix[i].pop());
 	}
 
 	let j12 = calculateLambda(a[1], r[0]);
-	console.log(j12);
-	r[1] = sumVectors(a[1], multiplicateNumberAndVector(-1 * j12, r[0]));
-	console.log(r[1]);
+	r[1] = sumLotsVectors(a[1], multiplicateNumberAndVector(-1 * j12, r[0]));
 
 	let j13 = calculateLambda(a[2], r[0]);
 	let j23 = calculateLambda(a[2], r[1]);
-	console.log(j13);
-	console.log(j23);
 
 	let tmp1 = multiplicateNumberAndVector(-1 * j13, r[0]);
 	let tmp2 = multiplicateNumberAndVector(-1 * j23, r[1]);
 
+	const T = [[1, j12, j13], [0, 1, j23], [0, 0, 1]];
+	const Tinvers = inverseMatrix(T);
 	r[2] = sumLotsVectors(a[2], tmp1, tmp2);
 
-	console.log(r[2]);
+	let Rtrans = [];
+	let R = [];
+	for (let i = 0; i < 3; i++) {
+		Rtrans.push(r[i]);
+	}
+	R = transMatrix(Rtrans);
+
+	const D = multiplyMatrix(Rtrans, R);
+	const DInvers = inverseMatrix(D);
+
+	//вычисление результата
+	const betta = multiplyMatrixAndVector(Rtrans, b);
+	const TD = multiplyMatrix(Tinvers, DInvers);
+	const otvet = multiplyMatrixAndVector(TD, betta);
+	console.log(otvet);
 }
 
 function calculateLambda(a, r) {
@@ -52,6 +66,18 @@ function multiplicateNumberAndVector(num, vector) {
 	return result;
 }
 
+function sumVectorWithVectorsArr(vector, vectorsArr) {
+	let result = new Array(vectors.length + 1);
+
+	for (let i = 0; i < vectorsArr.length; i++) {
+		for (let j = 0; j < vectorsArr[i].length; j++) {
+			result[j] += vectorsArr[i][j];
+		}
+	}
+
+	return sumVectors(vector, result);
+}
+
 function sumVectors(v1, v2) {
 	let result = v1.map((el, ind) => {
 		return el += v2[ind];
@@ -61,8 +87,8 @@ function sumVectors(v1, v2) {
 }
 
 export function sumLotsVectors(...vectors) {
-	let result = [0, 0, 0];
-	console.log(vectors.length);
+	let result = new Array(vectors.length);
+
 	for (let i = 0; i < vectors.length; i++) {
 		for (let j = 0; j < vectors[i].length; j++) {
 			result[j] += vectors[i][j];
@@ -168,4 +194,61 @@ function adjugateMatrix(A) {
 	}
 
 	return adjA;
+}
+
+function inverseMatrix(A) {
+	const det = determinant(A);
+	if (det == 0) {
+		return false;
+	}
+	let N = A.length;
+	const B = adjugateMatrix(A);
+	for (var i = 0; i < N; i++) {
+		for (var j = 0; j < N; j++) {
+			B[i][j] /= det;
+		}
+	}
+	return B;
+}
+
+function multiplyMatrix(A, B) {
+	let rowsA = A.length;
+	let colsA = A[0].length;
+	let rowsB = B.length;
+	let colsB = B[0].length;
+	let C = [];
+	if (colsA != rowsB) {
+		return false;
+	}
+	for (let i = 0; i < rowsA; i++) {
+		C[i] = [];
+	}
+	for (let k = 0; k < colsB; k++) {
+		for (let i = 0; i < rowsA; i++) {
+			let t = 0;
+			for (let j = 0; j < rowsB; j++) {
+				t += A[i][j] * B[j][k];
+			}
+			C[i][k] = t;
+		}
+	}
+	return C;
+}
+
+function multiplyMatrixAndVector(A, B) {
+	let C = [];
+
+	for (let i = 0; i < B.length; i++) {
+		C[i] = 0;
+	}
+
+	for (let i = 0; i < A.length; i++) {
+		let res = 0;
+		for (let j = 0; j < A.length; j++) {
+			res += A[i][j] * B[j];
+		}
+		C[i] = res;
+	}
+
+	return C;
 }
