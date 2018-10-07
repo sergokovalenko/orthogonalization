@@ -42,9 +42,9 @@ export function calc(matrix) {
 
 	const betta = multiplyMatrixAndVector(Rtrans, b);
 	const TD = multiplyMatrix(Tinvers, DInvers);
-	const otvet = multiplyMatrixAndVector(TD, betta);
+	const result = multiplyMatrixAndVector(TD, betta);
 	console.log('Result:');
-	console.log(otvet);
+	console.log(result);
 }
 
 function getUnitMatrix(n) {
